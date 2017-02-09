@@ -13,10 +13,18 @@ There's no time to follow such ridiculous instructions on foot, though,
 so you take a moment and work out the destination. Given that you can only 
 walk on the street grid of the city, how far is the shortest path to the 
 destination?
+
+
+--- Part Two ---
+
+Then, you notice the instructions continue on the back of the Recruiting Document. Easter Bunny HQ is actually at the first location you visit twice.
+
+For example, if your instructions are R8, R4, R4, R8, the first location you visit twice is 4 blocks away, due East.
+
+How many blocks away is the first location you visit twice?
+
 """
 
-import urllib2
-import requests
 import numpy as np
 
 class Walk(object):
@@ -96,17 +104,6 @@ def calc_distance_to_HQ(inplist):
 		walk.move(num_blocks)
 	distance = walk.taxi_cab_distance()
 	print('Easter bunny HQ is %d blocks away' % distance)
-
-
-# def get_intermediate_coordinates(coord1, coord2):
-# 	x1, y1 = coord1
-# 	x2, y2 = coord2
-# 	coords = []
-# 	if (x1 == x2) & (y1 == y2):
-# 		return []
-# 	elif (x1 == x2):
-# 		if y1 > y2:
-# 			for i in xrange(y2-y1):
 
 
 def first_repeated_position(inplist):
