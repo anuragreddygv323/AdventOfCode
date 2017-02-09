@@ -20,6 +20,9 @@ import requests
 import numpy as np
 
 class Walk(object):
+	"""
+	A class that keeps updating coordinates as you walk in a city grid
+	"""
 	
 	def __init__(self, bearing = 'N'):
 		self.distance = 0
@@ -28,12 +31,23 @@ class Walk(object):
 		self.coordinates = (0,0)
 		self.compass = 'NESW'	
 
-	def parse_location(self):
+	def parse_location(self, direction):
+		"""
+		Extracts the directions from an instruction.
+		If the instruction is L1, it returns 
+		lr : 'L' or 'R' left or right direction
+		num_blocks: how many blocks to walk
+		"""
+		self.direction = direction
 		lr = self.direction[0]
 		num_blocks = int(self.direction[1:])
 		return lr, num_blocks
 
 	def move(self, num_blocks):
+		"""
+		Depending on the bearing and the current coordinates, it moves the
+		stated number of blocks and updates the current coordinates
+		"""
 		x, y = self.coordinates[0], self.coordinates[1]
 		if self.bearing == 'N':
 			y += num_blocks 
@@ -45,9 +59,10 @@ class Walk(object):
 			x -= num_blocks
 		self.coordinates = (x,y)
 
-	def update_location(self, direction):
-		self.direction = direction
-		lr, num_blocks = self.parse_location()
+	def update_bearing(self, lr):
+		"""
+		Given a direction, it updates bearing and initiates a move
+		"""
 		index = self.compass.index(self.bearing)
 		if lr == 'L':
 			index -= 1
@@ -55,30 +70,71 @@ class Walk(object):
 		elif lr == 'R':
 			index += 1
 			if index > (len(self.compass)-1):
-				index = -1
+				index = 0
 			self.bearing = self.compass[index]
-		self.move(num_blocks)
 
 	def taxi_cab_distance(self):
+		"""
+		Calculates the taxi_cab_distance which, it the origin is (0,0)
+		is |x|+|y|
+		"""
 		self.distance = np.absolute(self.coordinates[0]) +\
 		np.absolute(self.coordinates[1])
 		return self.distance
 
+	def get_coordinates(self):
+		return self.coordinates
+
 	def __repr__(self):
 		print("You are at (%d, %d)" % self.coordinates)
 
+def calc_distance_to_HQ(inplist):
+	walk = Walk()
+	for direction in inplist:
+		lr, num_blocks = walk.parse_location(direction)
+		walk.update_bearing(lr)
+		walk.move(num_blocks)
+	distance = walk.taxi_cab_distance()
+	print('Easter bunny HQ is %d blocks away' % distance)
+
+
+# def get_intermediate_coordinates(coord1, coord2):
+# 	x1, y1 = coord1
+# 	x2, y2 = coord2
+# 	coords = []
+# 	if (x1 == x2) & (y1 == y2):
+# 		return []
+# 	elif (x1 == x2):
+# 		if y1 > y2:
+# 			for i in xrange(y2-y1):
+
+
+def first_repeated_position(inplist):
+	walk = Walk()
+	old_coords = (0,0)
+	coords = [old_coords]
+	for direction in inplist:
+		lr, num_blocks = walk.parse_location(direction)
+		walk.update_bearing(lr)
+		for i in xrange(num_blocks):
+			walk.move(1)
+			current_coords = walk.get_coordinates()
+			#print direction, current_coords
+			if current_coords in coords:
+				distance = walk.taxi_cab_distance()
+				return distance
+			coords.append(current_coords)
+	
 
 
 def main():
 	inp = "R3, L5, R1, R2, L5, R2, R3, L2, L5, R5, L4, L3, R5, L1, R3, R4, R1, L3, R3, L2, L5, L2, R4, R5, R5, L4, L3, L3, R4, R4, R5, L5, L3, R2, R2, L3, L4, L5, R1, R3, L3, R2, L3, R5, L194, L2, L5, R2, R1, R1, L1, L5, L4, R4, R2, R2, L4, L1, R2, R53, R3, L5, R72, R2, L5, R3, L4, R187, L4, L5, L2, R1, R3, R5, L4, L4, R2, R5, L5, L4, L3, R5, L2, R1, R1, R4, L1, R2, L3, R5, L4, R2, L3, R1, L4, R4, L1, L2, R3, L1, L1, R4, R3, L4, R2, R5, L2, L3, L3, L1, R3, R5, R2, R3, R1, R2, L1, L4, L5, L2, R4, R5, L2, R4, R4, L3, R2, R1, L4, R3, L3, L4, L3, L1, R3, L2, R2, L4, L4, L5, R3, R5, R3, L2, R5, L2, L1, L5, L1, R2, R4, L5, R2, L4, L5, L4, L5, L2, L5, L4, R5, R3, R2, R2, L3, R3, L2, L5"
+	#inp = 'R8, R4, R4, R8'
 	inplist = inp.split(', ')
-	walk = Walk()
+	calc_distance_to_HQ(inplist)
+	distance = first_repeated_position(inplist)
+	print('first location you visit twice is %d away' % distance)
 
-	for direction in inplist:
-		walk.update_location(direction)
-
-	distance = walk.taxi_cab_distance()
-	print distance
 
 if __name__ == '__main__':
 	main()
