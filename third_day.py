@@ -43,17 +43,26 @@ def is_triangle(full_input, a, b, c):
 	valid_inputs = full_input[:, a] + full_input[:, b] > full_input[:,c]
 	return full_input[valid_inputs]
 
+def num_valid_triangles(full_input):
+	sub_input = is_triangle(full_input, 0, 1, 2)
+	sub_input = is_triangle(sub_input, 1, 2, 0)
+	sub_input = is_triangle(sub_input, 0, 2, 1)
+	return sub_input.shape[0]
+
 def groups_of_3(full_input, a):
 	return full_input[:,a].reshape(full_input.shape[0]/3, 3)
 
 def main():
 	full_input = np.loadtxt('input3.txt')
-	sub_input = is_triangle(full_input, 0, 1, 2)
-	sub_input = is_triangle(sub_input, 1, 2, 0)
-	sub_input = is_triangle(sub_input, 0, 2, 1)
-	print('Number of valid traingles are %d' % sub_input.shape[0])
+	print('Answer 1: Num of valid traingles are %d' %\
+	 num_valid_triangles(full_input))
 
-	print groups_of_3(full_input, 0)
+	num_triangles = 0
+	for i in xrange(3):
+		tri_stack = groups_of_3(full_input, i)
+		num_triangles += num_valid_triangles(tri_stack)
+	print('Answer 2: %d' % num_triangles)
+
 
 if __name__ == "__main__":
 	main()
