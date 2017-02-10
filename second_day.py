@@ -73,6 +73,8 @@ LUDRULUULRRDDDDRRDUURUDDRLDDLDRDURRURULRDLDLDUUDRRDUUDUDLLLRRLDUDDRLDDLRRLRDRLUD
 DUUULDUDDDURLLULDDLLUDURLLLURULULURUURDRURLRULLLLDRDDULRRDRRLLLRDDDUULLRRURRULLDDURRRLRDDLULDULLDUDLURRDLDDLURDLRLLDRURLLRLLRRRDRRRURURUUDDLLDDLDDDLRLURUUUULRDLUDDDURLLDDRLDRRLLUDUUULRLLDRRRLRUUDLDUULRLUDRULLLLDUDLLUUDDRUURLURUDRDDDLRURUDRLULLULUUDLDURDULRRDRLDURUULRDRRRDRDRRLRLRDDUULLRDLDURDDDULURRLULDDURDURDDUDURDLLUUULUDULRDDLDRDRUDLLUURDLRDURURULURULLDRLLRRULDLULULDLULRURLRRLUDLLLRLUDLURLULDULDRLLLDLDDDDRDRLRRLRDULUUDULDDLDURDLLLDDDDLLUURRDURLDLUDDLULRUUUDDRRLDLLLRDLLDRRRDDLULLURDDRRRRLDLRLLLRL
 LULLRRDURRLDUUDRRURLURURRRLRDRUULUULURLLURRDRULRDURDDDDUULLLLDUULDLULURDRLDLULULDRLLDLLRLRULURUDRUUDULRULLLUDRULUDRLLUDLDRRDRUUURURLRDURDRLRDDDURLURRDLRUUUDUURULULDLUULRDLRRRDRDRLLLDLRRDRLLDDULDRUDRRLULLRDLDUDDULRDDLULRURULRLLLULDLLLLRDLDRURUDUURURLDRLUULLDUDULUDDDULUDLRUDDUDLULLUULUUURULURRULRDDURDDLURLRRDRDLDULRLRDRRRULRDDDRLLDDDDRRRRDRDLULUURDURULDLRDULDUDLDURUDLUDLUDDDUDURDURDDURLLRUDUURRRUDRRRRULLLLDDDLUULLUULRRRULDLURDLULRULDRLR"""
 
+import numpy as np
+
 class Keypad(object):
 	def __init__(self):
 		self.coords = (1, 1)
@@ -122,13 +124,62 @@ class Keypad(object):
 
 class FancyKeypad(object):
 	def __init__(self):
-		
+		self.size = 5
+		self.pad = [[0, 0, 1, 0, 0],\
+		 [0, 2, 3, 4, 0], \
+		 [5, 6, 7, 8, 9], \
+		 [0, 'A', 'B', 'C', 0],\
+		 [0, 0, 'D', 0, 0]]
+		self.coords = (2, 0)
+
+	def move(self, direction):
+		y, x = self.coords
+		m = self.size
+		if direction == 'L':
+			x -= 1
+			x = max(x, 0)
+		elif direction == 'R':
+			x += 1
+			x = min(x, m - 1)
+		elif direction == 'U':
+			y -= 1
+			y = max(y, 0)
+		elif direction == 'D':
+			y += 1
+			y = min(y, m - 1)
+
+		num = self.pad[y][x]
+		print num, direction
+		if num != 0:
+			#print num
+			self.coords = (y, x)
+
+	def parse_sequence(self, sequence):
+		if len(sequence) > 0:
+			self.move(sequence[0])
+			#print self.pad[self.coords]
+			return self.parse_sequence(sequence[1:])
+		else:
+			y, x = self.coords
+			number = self.pad[y][x]
+			return number
+
+	def parse_code(self, code):
+		sequences = code.split('\n')
+		number = ''
+		for sequence in sequences:
+			num = self.parse_sequence(sequence)
+			number = number + str(num)
+		return number
 
 
 def main():
 	keypad = Keypad()
 	code = keypad.parse_code(aoc_input)
 	print('The keypad code is %s' % code)
+	fancypad = FancyKeypad()
+	fancy_code = fancypad.parse_code(aoc_input)
+	print('The keypad code is %s' % fancy_code)
 
 if __name__ == "__main__":
 	main()
